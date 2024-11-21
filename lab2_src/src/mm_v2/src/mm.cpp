@@ -92,12 +92,13 @@ void mm(DTYPE *A,  block_t *B_p, block_t *AB_p,   int N )
 
 #pragma HLS pipeline II=1
 //       read from B_p to temp 
-                        block_t B_temp = B_p[(kb*M+jj)*N+jb*M+k];
+                        block_t B_temp = B_p[(kb * M + jb * M / DTYPE_PER_PORT + jj) * N + k];
+
 
 						for (int j = 0; j < DTYPE_PER_PORT; j++) {
 #pragma HLS unroll
 // Fill This Part !!! assign temp to Bj
-                            Bj[jj * DTYPE_PER_PORT + j] = temp.range((j + 1) * DTYPE_WIDTH_b - 1, j * DTYPE_WIDTH_b);
+                            Bj[jj * DTYPE_PER_PORT + j] = B_temp.range((j + 1) * DTYPE_WIDTH_b - 1, j * DTYPE_WIDTH_b);
                         
                         
 							
@@ -127,7 +128,8 @@ void mm(DTYPE *A,  block_t *B_p, block_t *AB_p,   int N )
                         AB_temp.range((j + 1) * DTYPE_WIDTH_b - 1, j * DTYPE_WIDTH_b) = AB_block[i][jj * DTYPE_PER_PORT + j];
 					}
 //                      read from temp to AB_p 
-                        AB_p[((ib * M + i) * N + jb * M + jj)] = AB_temp;
+                        AB_p[((ib * M + i) * N + jb * M / DTYPE_PER_PORT + jj)] = AB_temp;
+
 
                 }
             }
